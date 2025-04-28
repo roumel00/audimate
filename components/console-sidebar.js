@@ -106,7 +106,10 @@ export function ConsoleSidebar() {
             
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="cursor-pointer" onClick={() => signOut({ callbackUrl: "/" })}>
+                <SidebarMenuButton 
+                  className="cursor-pointer hover:text-red-500 transition-all duration-200" 
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
                   <LogOut />
                   <span>Sign Out</span>
                 </SidebarMenuButton>
