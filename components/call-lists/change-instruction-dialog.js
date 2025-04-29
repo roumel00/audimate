@@ -126,13 +126,12 @@ export function ChangeInstructionDialog({ isOpen, setIsOpen, callListId, current
             </div>
             
             <Select value={selectedInstructionId || "none"} onValueChange={handleInstructionChange}>
-              <SelectTrigger disabled={isLoadingInstructions}>
+              <SelectTrigger className="cursor-pointer" disabled={isLoadingInstructions}>
                 <SelectValue placeholder="Select an instruction set" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None (Remove instruction)</SelectItem>
                 {instructions.map((instruction) => (
-                  <SelectItem key={instruction.id} value={instruction.id}>
+                  <SelectItem className="cursor-pointer transition-all duration-300" key={instruction.id} value={instruction.id}>
                     {instruction.name}
                   </SelectItem>
                 ))}

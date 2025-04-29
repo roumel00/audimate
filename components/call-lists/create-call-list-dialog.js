@@ -135,15 +135,14 @@ export function CreateCallListDialog({ isOpen, setIsOpen, onCallListCreated }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="instructionId">Instruction Set (Optional)</Label>
+            <Label htmlFor="instructionId">Instruction Set</Label>
             <Select value={formData.instructionId} onValueChange={handleInstructionChange}>
-              <SelectTrigger id="instructionId" disabled={isLoadingInstructions}>
+              <SelectTrigger className="cursor-pointer" id="instructionId" disabled={isLoadingInstructions}>
                 <SelectValue placeholder="Select an instruction set" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
                 {instructions.map((instruction) => (
-                  <SelectItem key={instruction.id} value={instruction.id}>
+                  <SelectItem className="cursor-pointer transition-all duration-300" key={instruction.id} value={instruction.id}>
                     {instruction.name}
                   </SelectItem>
                 ))}

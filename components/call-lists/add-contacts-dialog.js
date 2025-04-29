@@ -232,7 +232,7 @@ export function AddContactsDialog({ isOpen, setIsOpen, onAddContacts, existingCo
                   </CommandList>
                   {selectedTags.length > 0 && (
                     <div className="border-t p-2">
-                      <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleClearTags}>
+                      <Button variant="destructive" size="sm" className="w-full justify-start" onClick={handleClearTags}>
                         <X className="h-4 w-4 mr-2" />
                         Clear tags
                       </Button>
@@ -262,7 +262,7 @@ export function AddContactsDialog({ isOpen, setIsOpen, onAddContacts, existingCo
                     onClick={() => handleTagSelect(tag.id)}
                     className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4 p-0.5 rounded-full cursor-pointer hover:bg-red-500 transition-all duration-300" />
                     <span className="sr-only">Remove {tag.name}</span>
                   </button>
                 </Badge>

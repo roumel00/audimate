@@ -282,8 +282,9 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
               <Label>Script</Label>
               <Tabs value={scriptTab} onValueChange={setScriptTab} className="w-full">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-                  <TabsTrigger value="upload">Upload File</TabsTrigger>
+                  <TabsTrigger value="manual" className={"cursor-pointer"}>Manual Entry</TabsTrigger>
+                  <Separator className={"mx-2 bg-primary"} orientation="vertical" />
+                  <TabsTrigger value="upload" className={"cursor-pointer"}>Upload File</TabsTrigger>
                 </TabsList>
                 <TabsContent value="manual" className="space-y-4">
                   <Textarea
@@ -418,7 +419,7 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                       className="self-end"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Objection
+                      Save Objection
                     </Button>
                   </div>
                 </div>

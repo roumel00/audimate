@@ -39,8 +39,8 @@ export function BulkActionsBar({ selectedCount, onDelete, onAddTag, tags }) {
                         onAddTag([tag.id])
                         setIsTagMenuOpen(false)
                       }}
+                      className={"cursor-pointer hover:bg-muted transition-all duration-300"}
                     >
-                      <Check className="mr-2 h-4 w-4 opacity-0" />
                       <span>{tag.name}</span>
                     </CommandItem>
                   ))}

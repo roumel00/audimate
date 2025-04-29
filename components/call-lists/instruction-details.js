@@ -86,8 +86,7 @@ export function InstructionDetails({ callListId, instruction, isLoading, onInstr
           <CardDescription>View the instruction set for this call list</CardDescription>
         </div>
         <Button variant="outline" size="sm" onClick={handleOpenChangeDialog}>
-          <Edit className="h-4 w-4 mr-2" />
-          Change
+          Change Script
         </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto">
