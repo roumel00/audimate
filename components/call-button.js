@@ -149,6 +149,7 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
           callListId,
           transcription,
           callLength,
+          status: "called"
         }),
       })
 

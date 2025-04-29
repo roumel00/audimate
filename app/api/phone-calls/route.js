@@ -13,18 +13,20 @@ export async function POST(request) {
 
     await dbConnect()
 
-    const { contactId, instructionId, callListId, transcription, callLength } = await request.json()
+    const { contactId, instructionId, callListId, transcription, callLength, status } = await request.json()
 
     if (!contactId) {
       return Response.json({ success: false, error: "Contact ID is required" }, { status: 400 })
     }
 
     const phoneCall = new PhoneCall({
+      user: session.user.id,
       contact: contactId,
       callList: callListId,
-      instruction: instructionId || null,
+      instruction: instructionId,
       transcription,
       callLength,
+      status,
       summary: null,
     })
 
@@ -49,8 +51,15 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url)
     const contactId = searchParams.get("contactId")
+    const callListId = searchParams.get("callListId")
 
-    const query = contactId ? { contact: contactId } : {}
+    const query = { user: session.user.id };
+    if (contactId) {
+      query.contact = contactId;
+    }
+    if (callListId) {
+      query.callList = callListId;
+    }
     const phoneCalls = await PhoneCall.find(query)
       .populate("contact", "name phoneNumber")
       .populate("instruction", "title")

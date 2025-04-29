@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -54,17 +54,17 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
       <Card className="h-full">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-8 w-48 bg-muted" />
+            <Skeleton className="h-10 w-24 bg-muted" />
           </div>
-          <Skeleton className="h-4 w-full max-w-[250px] mt-2" />
+          <Skeleton className="h-4 w-full max-w-[250px] mt-2 bg-muted" />
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-24 w-full mt-4" />
+            <Skeleton className="h-4 w-full bg-muted" />
+            <Skeleton className="h-4 w-full bg-muted" />
+            <Skeleton className="h-4 w-3/4 bg-muted" />
+            <Skeleton className="h-24 w-full mt-4 bg-muted" />
           </div>
         </CardContent>
       </Card>
@@ -108,17 +108,6 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
             <p className="text-muted-foreground max-w-md mb-6">
               This contact hasn't been called yet with this call list.
             </p>
-            {contact.phone && (
-              <div className="flex justify-center">
-                <CallButton
-                  phoneNumber={contact.phone}
-                  contactName={`${contact.firstName} ${contact.lastName}`}
-                  contactId={contact.id}
-                  callListId={callListId}
-                  size="default"
-                />
-              </div>
-            )}
           </div>
         )}
 
@@ -159,19 +148,6 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
           </div>
         )}
       </CardContent>
-      <CardFooter className="border-t pt-4">
-        {!error && phoneCall && contact.phone && (
-          <CallButton
-            phoneNumber={contact.phone}
-            contactName={`${contact.firstName} ${contact.lastName}`}
-            contactId={contact.id}
-            callListId={callListId}
-            size="default"
-          >
-            Call Again
-          </CallButton>
-        )}
-      </CardFooter>
     </Card>
   )
 }
