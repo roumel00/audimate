@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, FileUp, Plus, X } from "lucide-react"
+import { AlertCircle, FileUp, X } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -27,12 +26,17 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
   const [isCreateTagOpen, setIsCreateTagOpen] = useState(false)
   const [error, setError] = useState("")
   const [isImporting, setIsImporting] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
+  const dropZoneRef = useRef(null)
 
   const handleFileChange = async (e) => {
     setError("")
     const file = e.target.files[0]
+    await processFile(file)
+  }
 
+  const processFile = async (file) => {
     if (!file) return
 
     if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
@@ -55,6 +59,40 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
     } catch (err) {
       console.error("Error parsing CSV:", err)
       setError("Failed to parse CSV file. Please check the format.")
+    }
+  }
+
+  const handleDragEnter = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Only set isDragging to false if we're leaving the dropzone (not entering a child element)
+    if (e.currentTarget === e.target) {
+      setIsDragging(false)
+    }
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    setError("")
+
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      await processFile(files[0])
     }
   }
 
@@ -154,13 +192,30 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
             </TabsList>
 
             <TabsContent value="upload" className="flex-1 flex flex-col">
-              <div className="border-2 border-dashed rounded-md p-8 text-center flex flex-col items-center justify-center gap-4">
-                <FileUp className="h-10 w-10 text-muted-foreground" />
+              <div
+                ref={dropZoneRef}
+                onClick={() => fileInputRef.current?.click()}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className={`border-2 ${isDragging ? "border-primary bg-primary/5" : "border-dashed"} rounded-md p-8 text-center flex flex-col items-center justify-center gap-4 transition-colors duration-200 cursor-pointer`}
+              >
+                <FileUp className={`h-10 w-10 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="font-medium">Click to upload or drag and drop</p>
+                  <p className="font-medium">
+                    {isDragging ? "Drop your file here" : "Click to upload or drag and drop"}
+                  </p>
                   <p className="text-sm text-muted-foreground">CSV files only (max 5MB)</p>
                 </div>
-                <Input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileChange} className="max-w-xs" />
+
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.docx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
               </div>
 
               <div className="mt-6">

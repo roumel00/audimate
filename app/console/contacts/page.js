@@ -12,7 +12,8 @@ import { ImportContactsDialog } from "@/components/contacts/import-contacts-dial
 import { ContactDetailsCard } from "@/components/contacts/contact-details-card"
 import { BulkActionsBar } from "@/components/contacts/bulk-actions-bar"
 import { DeleteContactsDialog } from "@/components/dialogs/delete-contacts-dialog"
-import { UploadIcon as FileUpload, Users, Filter } from "lucide-react"
+import { AddContactDialog } from "@/components/contacts/add-contact-dialog"
+import { UploadIcon as FileUpload, Users, Filter, Search, X, UserPlus } from "lucide-react"
 import { EmptyContacts } from "@/components/contacts/empty-contacts"
 
 export default function ContactsPage() {
@@ -28,9 +29,11 @@ export default function ContactsPage() {
     totalPages: 0,
   })
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isAddContactDialogOpen, setIsAddContactDialogOpen] = useState(false)
   const [selectedContacts, setSelectedContacts] = useState([])
   const [selectedContact, setSelectedContact] = useState(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Fetch contacts with pagination and filtering
   const fetchContacts = async (page = 1, tagIds = []) => {
@@ -98,6 +101,11 @@ export default function ContactsPage() {
     fetchContacts(pagination.page, selectedTags)
   }
 
+  // Handle contact added
+  const handleContactAdded = () => {
+    fetchContacts(pagination.page, selectedTags)
+  }
+
   // Handle contact selection
   const handleSelectContact = (contactId, checked) => {
     if (checked) {
@@ -110,7 +118,7 @@ export default function ContactsPage() {
   // Handle select all contacts
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedContacts(contacts.map((contact) => contact.id))
+      setSelectedContacts(filteredContacts.map((contact) => contact.id))
     } else {
       setSelectedContacts([])
     }
@@ -194,6 +202,20 @@ export default function ContactsPage() {
     }
   }
 
+  // Filter contacts based on search query
+  const filteredContacts = contacts.filter((contact) => {
+    if (!searchQuery.trim()) return true
+
+    const query = searchQuery.toLowerCase().trim()
+    return (
+      (contact.firstName && contact.firstName.toLowerCase().includes(query)) ||
+      (contact.lastName && contact.lastName.toLowerCase().includes(query)) ||
+      (contact.email && contact.email.toLowerCase().includes(query)) ||
+      (contact.phone && contact.phone.toLowerCase().includes(query)) ||
+      (contact.tags && contact.tags.some((tag) => tag.name.toLowerCase().includes(query)))
+    )
+  })
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
@@ -205,10 +227,16 @@ export default function ContactsPage() {
         <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
           <TagFilter tags={tags} selectedTags={selectedTags} onChange={handleTagFilterChange} />
 
-          <Button onClick={() => setIsImportDialogOpen(true)}>
-            <FileUpload className="h-4 w-4 mr-2" />
-            Import Contacts
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setIsAddContactDialogOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Contact
+            </Button>
+            <Button onClick={() => setIsImportDialogOpen(true)}>
+              <FileUpload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -222,6 +250,28 @@ export default function ContactsPage() {
           />
         </div>
       )}
+
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search contacts by name, email, phone or tag..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-md border border-input bg-background py-2 pl-10 pr-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -252,7 +302,9 @@ export default function ContactsPage() {
               </div>
               <CardDescription>
                 {pagination.total > 0
-                  ? `Showing ${Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} to ${Math.min(pagination.page * pagination.limit, pagination.total)} of ${pagination.total} contacts`
+                  ? searchQuery
+                    ? `Found ${filteredContacts.length} contacts matching "${searchQuery}" out of ${pagination.total} total contacts`
+                    : `Showing ${Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} to ${Math.min(pagination.page * pagination.limit, pagination.total)} of ${pagination.total} contacts`
                   : "No contacts found"}
               </CardDescription>
             </CardHeader>
@@ -264,7 +316,7 @@ export default function ContactsPage() {
               ) : contacts.length > 0 ? (
                 <>
                   <ContactsTable
-                    contacts={contacts}
+                    contacts={searchQuery ? filteredContacts : contacts}
                     tags={tags}
                     selectedContacts={selectedContacts}
                     onSelectContact={handleSelectContact}
@@ -272,7 +324,7 @@ export default function ContactsPage() {
                     onRowClick={handleRowClick}
                   />
 
-                  {pagination.totalPages > 1 && (
+                  {pagination.totalPages > 1 && !searchQuery && (
                     <div className="mt-4 flex justify-center">
                       <Pagination
                         currentPage={pagination.page}
@@ -284,8 +336,11 @@ export default function ContactsPage() {
                 </>
               ) : (
                 <EmptyContacts
-                  hasFilters={selectedTags.length > 0}
-                  onClearFilters={() => handleTagFilterChange([])}
+                  hasFilters={selectedTags.length > 0 || searchQuery.length > 0}
+                  onClearFilters={() => {
+                    handleTagFilterChange([])
+                    setSearchQuery("")
+                  }}
                   onImport={() => setIsImportDialogOpen(true)}
                 />
               )}
@@ -304,6 +359,13 @@ export default function ContactsPage() {
         tags={tags}
         onImportSuccess={handleImportSuccess}
         onTagsUpdated={fetchTags}
+      />
+
+      <AddContactDialog
+        isOpen={isAddContactDialogOpen}
+        setIsOpen={setIsAddContactDialogOpen}
+        tags={tags}
+        onContactAdded={handleContactAdded}
       />
 
       <DeleteContactsDialog

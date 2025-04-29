@@ -22,7 +22,10 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [newObjection, setNewObjection] = useState({ objection: "", answer: "" })
+  const [isDragging, setIsDragging] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const fileInputRef = useRef(null)
+  const dropZoneRef = useRef(null)
 
   // Initialize form data when instruction changes
   useEffect(() => {
@@ -50,32 +53,92 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]
+  const processFile = async (file) => {
     if (!file) return
 
-    // Check file type
-    if (file.type !== "text/plain" && !file.name.endsWith(".docx")) {
-      setError("Please upload a .txt or .docx file")
-      return
-    }
+    setIsProcessing(true)
+    setError("")
 
-    // For .txt files, use FileReader
-    if (file.type === "text/plain") {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setFormData((prev) => ({ ...prev, currentScript: e.target.result }))
+    try {
+      // Check file type
+      if (file.type === "text/plain" || file.name.endsWith(".txt")) {
+        // For .txt files, use FileReader
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setFormData((prev) => ({ ...prev, currentScript: e.target.result }))
+          setIsProcessing(false)
+        }
+        reader.onerror = () => {
+          setError("Error reading file")
+          setIsProcessing(false)
+        }
+        reader.readAsText(file)
+      } else if (
+        file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        file.name.endsWith(".docx")
+      ) {
+        // For .docx files, we need to send to the server for processing
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch("/api/instructions/parse-docx", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.message || "Failed to parse Word document")
+        }
+
+        const data = await response.json()
+        setFormData((prev) => ({ ...prev, currentScript: data.text }))
+      } else {
+        throw new Error("Please upload a .txt or .docx file")
       }
-      reader.onerror = () => {
-        setError("Error reading file")
-      }
-      reader.readAsText(file)
-    } else {
-      // For .docx files, we would need a server-side solution or a library
-      // For now, just show an error
-      setError("DOCX files are not supported in this demo. Please use .txt files.")
+    } catch (err) {
+      console.error("Error processing file:", err)
+      setError(err.message || "Failed to process file")
+    } finally {
+      setIsProcessing(false)
     }
   }
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    processFile(file)
+  }
+
+  const handleDragEnter = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.currentTarget === e.target) {
+      setIsDragging(false)
+    }
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+  };
 
   const handleAddObjection = () => {
     if (!newObjection.objection.trim() || !newObjection.answer.trim()) {
@@ -232,22 +295,41 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                   />
                 </TabsContent>
                 <TabsContent value="upload" className="space-y-4">
-                  <div className="border-2 border-dashed rounded-md p-8 text-center flex flex-col items-center justify-center gap-4">
-                    <Upload className="h-10 w-10 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">Click to upload or drag and drop</p>
-                      <p className="text-sm text-muted-foreground">TXT files only (max 5MB)</p>
-                    </div>
-                    <Input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".txt"
-                      onChange={handleFileUpload}
-                      className="max-w-xs"
-                    />
+                  <div
+                    ref={dropZoneRef}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    className={`border-2 ${isDragging ? "border-primary bg-primary/5" : "border-dashed"} rounded-md p-8 text-center flex flex-col items-center justify-center gap-4 transition-colors duration-200 cursor-pointer`}
+                  >
+                  <Upload className={`h-10 w-10 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                  <div>
+                    <p className="font-medium">
+                      {isDragging ? "Drop your file here" : "Click to upload or drag and drop"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">TXT or DOCX files only (max 5MB)</p>
                   </div>
 
-                  {formData.currentScript && (
+                  {/* Hidden file input */}
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".txt,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                  {isProcessing && (
+                    <div className="mt-4 text-center">
+                      <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                      <p className="mt-2 text-sm text-muted-foreground">Processing your file...</p>
+                    </div>
+                  )}
+
+                  {formData.currentScript && !isProcessing && (
                     <div className="mt-4">
                       <Label>Preview</Label>
                       <div className="border rounded-md p-4 mt-2 max-h-[200px] overflow-y-auto whitespace-pre-wrap">

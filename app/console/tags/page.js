@@ -241,7 +241,19 @@ export default function TagsPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <TagDetailView tag={selectedTag} />
+          <TagDetailView
+            tag={selectedTag}
+            tags={tags}
+            onTagUpdated={(updatedTag) => {
+              setTags((prevTags) => prevTags.map((tag) => (tag.id === updatedTag.id ? updatedTag : tag)))
+              setSelectedTag(updatedTag)
+            }}
+            onTagDeleted={(tagId) => {
+              setTags((prevTags) => prevTags.filter((tag) => tag.id !== tagId))
+              setSelectedTag(null)
+              setIsDeleteDialogOpen(false)
+            }}
+          />
         </div>
       </div>
 
