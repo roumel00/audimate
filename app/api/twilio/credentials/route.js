@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { NextResponse } from "next/server"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { saveTwilioCredentials, validateTwilioCredentials } from "@/lib/twilio"
+import { saveTwilioCredentials } from "@/lib/twilio"
 
 export async function POST(request) {
   try {
@@ -12,13 +12,6 @@ export async function POST(request) {
     }
 
     const { accountSid, authToken } = await request.json()
-
-    // Validate the credentials before saving
-    const validation = await validateTwilioCredentials(accountSid, authToken)
-
-    if (!validation.valid) {
-      return NextResponse.json({ message: validation.message || "Invalid Twilio credentials" }, { status: 400 })
-    }
 
     const userId = session.user.id
     await saveTwilioCredentials(userId, { accountSid, authToken })

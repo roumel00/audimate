@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { ContactsManagement } from "@/components/call-lists/contacts-management"
 import { InstructionDetails } from "@/components/call-lists/instruction-details"
+import { PhoneCallDetails } from "@/components/call-lists/phone-call-details"
 
 export default function CallListDetailsPage() {
   const { id } = useParams()
@@ -20,6 +21,8 @@ export default function CallListDetailsPage() {
   const [instruction, setInstruction] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const [selectedContact, setSelectedContact] = useState(null)
+  const [rightSideView, setRightSideView] = useState("instruction") // Either "instruction" or "call"
 
   // Fetch call list details
   const fetchCallListDetails = async () => {
@@ -139,6 +142,18 @@ export default function CallListDetailsPage() {
     fetchCallListDetails()
   }
 
+  // Handle contact selection
+  const handleContactSelect = (contact) => {
+    setSelectedContact(contact)
+    setRightSideView("call")
+  }
+
+  // Handle back to instruction view
+  const handleBackToInstruction = () => {
+    setRightSideView("instruction")
+    setSelectedContact(null)
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -148,7 +163,7 @@ export default function CallListDetailsPage() {
         </Button>
 
         <h1 className="text-3xl font-bold">{isLoading ? "Loading..." : callList?.name}</h1>
-        <p className="text-muted-foreground mt-1">Manage contacts and view instruction details for this call list</p>
+        <p className="text-muted-foreground mt-1">Manage contacts and view details for this call list</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -156,19 +171,25 @@ export default function CallListDetailsPage() {
           <ContactsManagement
             callList={callList}
             contacts={contacts}
+            instruction={instruction}
             onAddContacts={handleAddContacts}
             onRemoveContacts={handleRemoveContacts}
             isLoading={isLoading}
+            onContactSelect={handleContactSelect}
           />
         </div>
 
         <div className="lg:col-span-1">
-          <InstructionDetails
-            callListId={id}
-            instruction={instruction}
-            isLoading={isLoading}
-            onInstructionChanged={handleInstructionChanged}
-          />
+          {rightSideView === "instruction" ? (
+            <InstructionDetails
+              callListId={id}
+              instruction={instruction}
+              isLoading={isLoading}
+              onInstructionChanged={handleInstructionChanged}
+            />
+          ) : (
+            <PhoneCallDetails contact={selectedContact} callListId={id} onBack={handleBackToInstruction} />
+          )}
         </div>
       </div>
     </div>

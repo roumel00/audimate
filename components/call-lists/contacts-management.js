@@ -7,11 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Search, Plus, Trash2, Users } from 'lucide-react'
+import { Search, Plus, Trash2, Users } from "lucide-react"
 import { AddContactsDialog } from "./add-contacts-dialog"
 import { EmptyContactsState } from "./empty-contacts-state"
+import CallButton from "@/components/call-button"
 
-export function ContactsManagement({ callList, contacts, onAddContacts, onRemoveContacts, isLoading }) {
+export function ContactsManagement({
+  callList,
+  contacts,
+  onAddContacts,
+  onRemoveContacts,
+  isLoading,
+  instruction,
+  onContactSelect,
+}) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedContacts, setSelectedContacts] = useState([])
   const [isAddContactsDialogOpen, setIsAddContactsDialogOpen] = useState(false)
@@ -53,6 +62,10 @@ export function ContactsManagement({ callList, contacts, onAddContacts, onRemove
   const handleAddContacts = async (contactIds) => {
     await onAddContacts(contactIds)
     setIsAddContactsDialogOpen(false)
+  }
+
+  const handleRowClick = (contact) => {
+    onContactSelect(contact)
   }
 
   if (isLoading) {
@@ -144,15 +157,20 @@ export function ContactsManagement({ callList, contacts, onAddContacts, onRemove
                     />
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Tags</TableHead>
+                  <TableHead className="hidden md:table-cell">Phone</TableHead>
+                  <TableHead className="hidden lg:table-cell">Email</TableHead>
+                  <TableHead className="hidden md:table-cell">Tags</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredContacts.map((contact) => (
-                  <TableRow key={contact.id}>
-                    <TableCell>
+                  <TableRow
+                    key={contact.id}
+                    className="cursor-pointer hover:bg-muted/40"
+                    onClick={() => handleRowClick(contact)}
+                  >
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedContacts.includes(contact.id)}
                         onCheckedChange={(checked) => handleSelectContact(contact.id, checked)}
@@ -160,14 +178,20 @@ export function ContactsManagement({ callList, contacts, onAddContacts, onRemove
                       />
                     </TableCell>
                     <TableCell className="font-medium">
-                      {contact.firstName} {contact.lastName}
+                      <div className="truncate max-w-[150px] md:max-w-none">
+                        {contact.firstName} {contact.lastName}
+                      </div>
                     </TableCell>
-                    <TableCell>{contact.phone || "—"}</TableCell>
-                    <TableCell>{contact.email || "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
+                    <TableCell className="hidden md:table-cell">
+                      <div className="truncate max-w-[120px]">{contact.phone || "—"}</div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="truncate max-w-[150px]">{contact.email || "—"}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex flex-wrap gap-1 max-w-[150px]">
                         {contact.tags && contact.tags.length > 0 ? (
-                          contact.tags.map((tag) => (
+                          contact.tags.slice(0, 2).map((tag) => (
                             <Badge key={tag.id} variant="secondary" className="text-xs">
                               {tag.name}
                             </Badge>
@@ -175,7 +199,27 @@ export function ContactsManagement({ callList, contacts, onAddContacts, onRemove
                         ) : (
                           <span className="text-muted-foreground text-xs">No tags</span>
                         )}
+                        {contact.tags && contact.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{contact.tags.length - 2}
+                          </Badge>
+                        )}
                       </div>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {contact.phone ? (
+                        <CallButton
+                          phoneNumber={contact.phone}
+                          contactName={`${contact.firstName} ${contact.lastName}`}
+                          contactId={contact.id}
+                          instructionId={instruction?.id}
+                          callListId={callList?.id}
+                        />
+                      ) : (
+                        <Button variant="outline" size="sm" disabled title="No phone number available">
+                          Call
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -194,4 +238,3 @@ export function ContactsManagement({ callList, contacts, onAddContacts, onRemove
     </Card>
   )
 }
-

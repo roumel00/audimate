@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# OpenAI Realtime Twilio Integration
 
-## Getting Started
+This is a port of the OpenAI Realtime Twilio demo into the Audimate project. It allows you to make phone calls using the OpenAI Realtime API through Twilio.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. Make sure you have the following environment variables set in your `.env.local` file:
+
+```
+# OpenAI API key
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Twilio config
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
+TWILIO_PHONE_NUMBER=your_twilio_phone_number_here
+
+# OpenAI Realtime Server config
+REALTIME_PORT=8081
+REALTIME_PUBLIC_URL=http://localhost:8081
+NEXT_PUBLIC_REALTIME_WS_URL=ws://localhost:8081/logs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+If deploying to production, make sure to update the URLs to your public-facing domain.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+2. Start the OpenAI Realtime server:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm run realtime-server
+```
 
-## Learn More
+3. Start the Next.js development server:
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+ngrok https 8081
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Visit http://localhost:3000/realtime-call to access the UI.
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Enter a phone number in the format required by Twilio (e.g., +1234567890).
+2. Click "Start Call" to initiate a call.
+3. The call will connect to the OpenAI Realtime API and start a conversation.
+4. The transcript will appear in the UI.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Customization
+
+To modify the OpenAI agent's behavior, you can edit:
+
+- The prompt in `lib/openai-realtime/sessionManager.js` 
+- The available functions in `lib/openai-realtime/functionHandlers.js`
+- The TwiML in `lib/openai-realtime/twiml.xml`
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Make sure both the Realtime server and Next.js server are running.
+2. Check that your Twilio and OpenAI API credentials are correct.
+3. Ensure your Twilio phone number is properly configured.
+4. Check the console logs for any error messages.
+
+For local development with Twilio webhooks, consider using a service like ngrok to expose your local server to the internet. 

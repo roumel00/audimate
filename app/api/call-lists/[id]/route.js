@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     await dbConnect()
 
