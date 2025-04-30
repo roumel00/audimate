@@ -13,9 +13,9 @@ import { Separator } from "@/components/ui/separator"
 export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
     name: "",
-    greeting: "",
     offering: "",
     currentScript: "",
+    accent: "Australian",
     objections: [],
   })
   const [scriptTab, setScriptTab] = useState("manual")
@@ -32,17 +32,17 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
     if (instruction) {
       setFormData({
         name: instruction.name || "",
-        greeting: instruction.greeting || "",
         offering: instruction.offering || "",
         currentScript: instruction.currentScript || "",
+        accent: instruction.accent || "Australian",
         objections: instruction.objections || [],
       })
     } else {
       setFormData({
         name: "",
-        greeting: "",
         offering: "",
         currentScript: "",
+        accent: "Australian",
         objections: [],
       })
     }
@@ -130,15 +130,15 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
   }
 
   const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  
-    const files = e.dataTransfer.files;
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
     if (files.length > 0) {
-      processFile(files[0]);
+      processFile(files[0])
     }
-  };
+  }
 
   const handleAddObjection = () => {
     if (!newObjection.objection.trim() || !newObjection.answer.trim()) {
@@ -188,9 +188,9 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
       if (!instruction) {
         setFormData({
           name: "",
-          greeting: "",
           offering: "",
           currentScript: "",
+          accent: "Australian",
           objections: [],
         })
         setNewObjection({ objection: "", answer: "" })
@@ -246,21 +246,6 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="greeting" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  Opening Greeting
-                </Label>
-                <Textarea
-                  id="greeting"
-                  name="greeting"
-                  value={formData.greeting}
-                  onChange={handleChange}
-                  placeholder="Enter the opening greeting for the call"
-                  className="min-h-[100px]"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="offering" className="flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                   Offering
@@ -276,15 +261,37 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="accent" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                Voice Accent
+              </Label>
+              <select
+                id="accent"
+                name="accent"
+                value={formData.accent}
+                onChange={handleChange}
+                className="cursor-pointer flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="American">American</option>
+                <option value="British">British</option>
+                <option value="Australian">Australian</option>
+              </select>
+            </div>
+
             <Separator />
 
             <div className="space-y-2">
               <Label>Script</Label>
               <Tabs value={scriptTab} onValueChange={setScriptTab} className="w-full">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="manual" className={"cursor-pointer"}>Manual Entry</TabsTrigger>
+                  <TabsTrigger value="manual" className={"cursor-pointer"}>
+                    Manual Entry
+                  </TabsTrigger>
                   <Separator className={"mx-2 bg-primary"} orientation="vertical" />
-                  <TabsTrigger value="upload" className={"cursor-pointer"}>Upload File</TabsTrigger>
+                  <TabsTrigger value="upload" className={"cursor-pointer"}>
+                    Upload File
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="manual" className="space-y-4">
                   <Textarea
@@ -305,23 +312,23 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                     onDrop={handleDrop}
                     className={`border-2 ${isDragging ? "border-primary bg-primary/5" : "border-dashed"} rounded-md p-8 text-center flex flex-col items-center justify-center gap-4 transition-colors duration-200 cursor-pointer`}
                   >
-                  <Upload className={`h-10 w-10 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
-                  <div>
-                    <p className="font-medium">
-                      {isDragging ? "Drop your file here" : "Click to upload or drag and drop"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">TXT or DOCX files only (max 5MB)</p>
-                  </div>
+                    <Upload className={`h-10 w-10 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                    <div>
+                      <p className="font-medium">
+                        {isDragging ? "Drop your file here" : "Click to upload or drag and drop"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">TXT or DOCX files only (max 5MB)</p>
+                    </div>
 
-                  {/* Hidden file input */}
-                  <Input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".txt,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </div>
+                    {/* Hidden file input */}
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".txt,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
 
                   {isProcessing && (
                     <div className="mt-4 text-center">

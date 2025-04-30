@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     await dbConnect()
 
@@ -30,7 +30,6 @@ export async function GET(request, { params }) {
       instruction: {
         id: instruction._id.toString(),
         name: instruction.name,
-        greeting: instruction.greeting,
         offering: instruction.offering,
         currentScript: instruction.currentScript,
         objections: instruction.objections || [],
@@ -76,7 +75,6 @@ export async function PATCH(request, { params }) {
       { _id: id, user: session.user.id },
       {
         name: data.name,
-        greeting: data.greeting || "",
         offering: data.offering || "",
         currentScript: data.currentScript || "",
         objections: data.objections || [],
@@ -93,7 +91,6 @@ export async function PATCH(request, { params }) {
       instruction: {
         id: updatedInstruction._id.toString(),
         name: updatedInstruction.name,
-        greeting: updatedInstruction.greeting,
         offering: updatedInstruction.offering,
         currentScript: updatedInstruction.currentScript,
         objections: updatedInstruction.objections || [],

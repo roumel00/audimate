@@ -14,7 +14,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const { contactIds } = await request.json()
 
     if (!Array.isArray(contactIds) || contactIds.length === 0) {

@@ -21,7 +21,6 @@ export async function GET(request) {
     const transformedInstructions = instructions.map((instruction) => ({
       id: instruction._id.toString(),
       name: instruction.name,
-      greeting: instruction.greeting,
       offering: instruction.offering,
       currentScript: instruction.currentScript,
       objections: instruction.objections || [],
@@ -64,7 +63,6 @@ export async function POST(request) {
     const newInstruction = new Instruction({
       user: session.user.id,
       name: data.name,
-      greeting: data.greeting || "",
       offering: data.offering || "",
       currentScript: data.currentScript || "",
       objections: data.objections || [],
@@ -78,7 +76,6 @@ export async function POST(request) {
         instruction: {
           id: newInstruction._id.toString(),
           name: newInstruction.name,
-          greeting: newInstruction.greeting,
           offering: newInstruction.offering,
           currentScript: newInstruction.currentScript,
           objections: newInstruction.objections || [],

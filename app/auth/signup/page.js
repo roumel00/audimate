@@ -15,6 +15,7 @@ export default function SignUp() {
     name: "",
     email: "",
     password: "",
+    company: "",
   })
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -80,6 +81,10 @@ export default function SignUp() {
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company</Label>
+              <Input id="company" name="company" value={formData.company} onChange={handleChange} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

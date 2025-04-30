@@ -6,6 +6,7 @@ import { Phone } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import handleRealtimeEvent from "@/lib/handle-realtime-event"
+import { getPrompt } from "@/lib/formulate-prompt"
 
 const BASE_WS_URL = process.env.NEXT_PUBLIC_REALTIME_WS_URL || "ws://localhost:8081"
 
@@ -26,11 +27,15 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
     const socket = new WebSocket(`${BASE_WS_URL.replace(/\/?$/, "/logs")}`)
     logsWsRef.current = socket
 
-    socket.onopen = () => {
+    socket.onopen = async () => {
+      const promptText = await fetchPrompt();
       socket.send(
         JSON.stringify({
           type: "session.update",
-          session: { modalities: ["text", "audio"] },
+          session: { 
+            modalities: ["text", "audio"],
+            instructions: promptText 
+          },
         }),
       )
       setCallStatus("connected")
@@ -239,6 +244,25 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
 
       return null
     })
+
+  const fetchPrompt = async () => {
+    let promptText = null
+
+    if (instructionId) {
+      const instructionRes = await fetch(`/api/instructions/${instructionId}`)
+      const instructionData = await instructionRes.json()
+
+      
+      const userRes = await fetch("/api/auth/user")
+      const userData = await userRes.json()
+      
+      if (instructionData && userData) {
+        promptText = getPrompt(userData.user.company, instructionData.instruction)
+      }
+    }
+
+    return promptText;
+  }
 
   return (
     <>

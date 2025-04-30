@@ -3,10 +3,10 @@ import { createUser, findUserByEmail } from "@/lib/auth"
 
 export async function POST(request) {
   try {
-    const { name, email, password } = await request.json()
+    const { name, email, password, company } = await request.json()
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !company) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 })
     }
 
@@ -21,7 +21,7 @@ export async function POST(request) {
     }
 
     // Create new user
-    const user = await createUser({ name, email, password })
+    const user = await createUser({ name, email, password, company })
 
     return NextResponse.json(
       {

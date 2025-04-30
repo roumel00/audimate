@@ -42,7 +42,6 @@ export async function GET(request, { params }) {
         instruction = {
           id: instruction._id.toString(),
           name: instruction.name,
-          greeting: instruction.greeting,
           offering: instruction.offering,
           currentScript: instruction.currentScript,
           objections: instruction.objections || [],

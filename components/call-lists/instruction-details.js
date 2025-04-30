@@ -100,16 +100,6 @@ export function InstructionDetails({ callListId, instruction, isLoading, onInstr
 
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-              <MessageSquare className="h-4 w-4" />
-              Opening Greeting
-            </h4>
-            <div className="bg-muted/30 rounded-md p-3 whitespace-pre-wrap">
-              {instruction.greeting || <span className="text-muted-foreground italic">No greeting specified</span>}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
               <ShoppingBag className="h-4 w-4" />
               Offering
             </h4>
