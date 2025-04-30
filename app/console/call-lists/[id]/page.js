@@ -154,6 +154,13 @@ export default function CallListDetailsPage() {
     setSelectedContact(null)
   }
 
+  // Add a function to handle call completion that updates both components
+  const handleCallCompleted = (contactId, phoneCall) => {
+    if (selectedContact && selectedContact.id === contactId) {
+      setSelectedContact({ ...selectedContact, _forceRefresh: Date.now() })
+    }
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -176,6 +183,7 @@ export default function CallListDetailsPage() {
             onRemoveContacts={handleRemoveContacts}
             isLoading={isLoading}
             onContactSelect={handleContactSelect}
+            onCallCompleted={handleCallCompleted}
           />
         </div>
 
@@ -188,7 +196,9 @@ export default function CallListDetailsPage() {
               onInstructionChanged={handleInstructionChanged}
             />
           ) : (
-            <PhoneCallDetails contact={selectedContact} callListId={id} onBack={handleBackToInstruction} />
+            selectedContact && (
+              <PhoneCallDetails contact={selectedContact} callListId={id} onBack={handleBackToInstruction} />
+            )
           )}
         </div>
       </div>

@@ -10,7 +10,14 @@ import { getPrompt } from "@/lib/formulate-prompt"
 
 const BASE_WS_URL = process.env.NEXT_PUBLIC_REALTIME_WS_URL || "ws://localhost:8081"
 
-export default function CallButton({ phoneNumber, contactName, contactId, instructionId, callListId }) {
+export default function CallButton({
+  phoneNumber,
+  contactName,
+  contactId,
+  instructionId,
+  callListId,
+  onCallCompleted,
+}) {
   const [loading, setLoading] = useState(false)
   const [callStatus, setCallStatus] = useState("disconnected")
   const [open, setOpen] = useState(false)
@@ -169,6 +176,11 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
         title: "Call saved",
         description: "The call transcript has been saved successfully",
       })
+
+      // Call the onCallCompleted callback if provided
+      if (typeof onCallCompleted === "function") {
+        onCallCompleted(contactId, data.phoneCall)
+      }
     } catch (error) {
       console.error("Error saving call transcript:", error)
       toast({
@@ -347,8 +359,8 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={endCall} disabled={isSaving}>
-              {isSaving ? "Saving..." : callStatus === "connected" ? "End Call" : "Close"}
+            <Button variant="outline" onClick={endCall} disabled={isSaving || callStatus === "disconnected"}>
+              {isSaving ? "Saving..." : callStatus !== "disconnected" ? "End Call" : "Ending Call.."}
             </Button>
           </div>
         </DialogContent>

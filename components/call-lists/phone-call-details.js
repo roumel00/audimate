@@ -13,40 +13,40 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const fetchPhoneCall = async () => {
-      if (!contact?.id) return
+  const refreshPhoneCall = async () => {
+    if (!contact?.id) return
 
-      try {
-        setIsLoading(true)
-        setError(null)
+    try {
+      setIsLoading(true)
+      setError(null)
 
-        const response = await fetch(`/api/phone-calls?contactId=${contact.id}`)
-        if (!response.ok) {
-          throw new Error("Failed to fetch phone call data")
-        }
-
-        const data = await response.json()
-
-        if (data.success) {
-          // Filter phone calls for the current call list
-          const callsForThisList = data.phoneCalls.filter(
-            (call) => call.callList && call.callList.toString() === callListId,
-          )
-
-          setPhoneCall(callsForThisList.length > 0 ? callsForThisList[0] : null)
-        } else {
-          throw new Error(data.error || "Unknown error")
-        }
-      } catch (error) {
-        console.error("Error fetching phone call:", error)
-        setError(error.message)
-      } finally {
-        setIsLoading(false)
+      const response = await fetch(`/api/phone-calls?contactId=${contact.id}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch phone call data")
       }
-    }
 
-    fetchPhoneCall()
+      const data = await response.json()
+
+      if (data.success) {
+        // Filter phone calls for the current call list
+        const callsForThisList = data.phoneCalls.filter(
+          (call) => call.callList && call.callList.toString() === callListId,
+        )
+
+        setPhoneCall(callsForThisList.length > 0 ? callsForThisList[0] : null)
+      } else {
+        throw new Error(data.error || "Unknown error")
+      }
+    } catch (error) {
+      console.error("Error fetching phone call:", error)
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    refreshPhoneCall()
   }, [contact, callListId])
 
   if (isLoading) {

@@ -27,31 +27,35 @@ export function ContactsManagement({
   const [phoneCalls, setPhoneCalls] = useState([])
   const [calledContactIds, setCalledContactIds] = useState(new Set())
 
-  useEffect(() => {
-    const fetchPhoneCalls = async () => {
-      if (!callList?.id) return
+  const refreshPhoneCalls = async () => {
+    if (!callList?.id) return
 
-      try {
-        const response = await fetch(`/api/phone-calls?callListId=${callList.id}`)
-        const data = await response.json()
+    try {
+      const response = await fetch(`/api/phone-calls?callListId=${callList.id}`)
+      const data = await response.json()
 
-        if (data.success) {
-          setPhoneCalls(data.phoneCalls)
+      if (data.success) {
+        setPhoneCalls(data.phoneCalls)
 
-          const toId = (c) => (c?._id ?? null);
-          const calledIds = new Set(
-            data.phoneCalls
-              .map((call) => toId(call.contact))
-              .filter(Boolean)
-          );
-          setCalledContactIds(calledIds);
-        }
-      } catch (error) {
-        console.error("Error fetching phone calls:", error)
+        const toId = (c) => c?._id ?? null
+        const calledIds = new Set(data.phoneCalls.map((call) => toId(call.contact)).filter(Boolean))
+        setCalledContactIds(calledIds)
       }
+    } catch (error) {
+      console.error("Error fetching phone calls:", error)
     }
+  }
 
-    fetchPhoneCalls()
+  const handleCallCompleted = (contactId) => {
+    // Update calledContactIds immediately
+    setCalledContactIds((prev) => new Set([...prev, contactId]))
+
+    // Also refresh the full phone calls data
+    refreshPhoneCalls()
+  }
+
+  useEffect(() => {
+    refreshPhoneCalls()
   }, [callList?.id])
 
   // Filter contacts based on search query
@@ -241,6 +245,7 @@ export function ContactsManagement({
                             contactId={contact.id}
                             instructionId={instruction?.id}
                             callListId={callList?.id}
+                            onCallCompleted={handleCallCompleted}
                           />
                         ) : (
                           <Button variant="outline" size="sm" disabled title="No phone number available">
