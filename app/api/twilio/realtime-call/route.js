@@ -49,3 +49,37 @@ export async function POST(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return Response.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const callSid = searchParams.get("callSid");
+
+    if (!callSid) {
+      return Response.json(
+        { success: false, error: "callSid query parameter is required" },
+        { status: 400 }
+      );
+    }
+
+    const { twilioClient } = await getTwilioClient(session.user.id);
+
+    await twilioClient.calls(callSid).update({ status: "completed" });
+
+    return Response.json({ success: true, callSid });
+  } catch (error) {
+    console.error("Error ending call:", error);
+    return Response.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}

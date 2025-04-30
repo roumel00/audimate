@@ -38,9 +38,13 @@ export function ContactsManagement({
         if (data.success) {
           setPhoneCalls(data.phoneCalls)
 
-          // Create a Set of contact IDs that have been called
-          const calledIds = new Set(data.phoneCalls.map((call) => call.contact._id))
-          setCalledContactIds(calledIds)
+          const toId = (c) => (c?._id ?? null);
+          const calledIds = new Set(
+            data.phoneCalls
+              .map((call) => toId(call.contact))
+              .filter(Boolean)
+          );
+          setCalledContactIds(calledIds);
         }
       } catch (error) {
         console.error("Error fetching phone calls:", error)

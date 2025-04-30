@@ -19,6 +19,7 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
   const [isSaving, setIsSaving] = useState(false)
 
   const logsWsRef = useRef(null)
+  const callSidRef = useRef(null)
   const { toast } = useToast()
 
   const connectLogsSocket = useCallback(() => {
@@ -28,13 +29,13 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
     logsWsRef.current = socket
 
     socket.onopen = async () => {
-      const promptText = await fetchPrompt();
+      const promptText = await fetchPrompt()
       socket.send(
         JSON.stringify({
           type: "session.update",
-          session: { 
+          session: {
             modalities: ["text", "audio"],
-            instructions: promptText 
+            instructions: promptText,
           },
         }),
       )
@@ -93,6 +94,8 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
       const data = await res.json()
 
       if (!data.success) throw new Error(data.error || "Unknown error")
+
+      callSidRef.current = data.callSid
 
       toast({
         title: "Call started",
@@ -154,7 +157,7 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
           callListId,
           transcription,
           callLength,
-          status: "called"
+          status: "called",
         }),
       })
 
@@ -181,6 +184,15 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
   const endCall = async () => {
     if (callStatus === "connected" && items.length > 0) {
       await saveCallTranscript()
+    }
+
+    stopRealtimeSession()
+
+    if (callSidRef.current) {
+      await fetch(`/api/twilio/realtime-call?callSid=${callSidRef.current}`, {
+        method: "DELETE",
+      })
+      callSidRef.current = null
     }
 
     closeLogsSocket()
@@ -252,16 +264,24 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
       const instructionRes = await fetch(`/api/instructions/${instructionId}`)
       const instructionData = await instructionRes.json()
 
-      
       const userRes = await fetch("/api/auth/user")
       const userData = await userRes.json()
-      
+
       if (instructionData && userData) {
         promptText = getPrompt(userData.user.company, instructionData.instruction)
       }
     }
 
-    return promptText;
+    return promptText
+  }
+
+  const stopRealtimeSession = () => {
+    if (!logsWsRef.current || logsWsRef.current.readyState !== WebSocket.OPEN) return
+
+    logsWsRef.current.send(JSON.stringify({ type: "response.cancel" }))
+    logsWsRef.current.send(JSON.stringify({ type: "output_audio_buffer.clear" }))
+
+    logsWsRef.current.close(1000, "Call ended by user")
   }
 
   return (
@@ -277,7 +297,13 @@ export default function CallButton({ phoneNumber, contactName, contactId, instru
         {loading ? "Calling…" : "Call"}
       </Button>
 
-      <Dialog open={open} onOpenChange={endCall}>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen)
+          if (!isOpen) endCall()
+        }}
+      >
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Call with {contactName}</DialogTitle>

@@ -151,36 +151,3 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
     </Card>
   )
 }
-
-// Import the CallButton component here to avoid circular references
-function CallButton({ phoneNumber, contactName, contactId, callListId, size = "sm", children }) {
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  if (!isClient) {
-    return (
-      <Button variant="default" size={size} disabled>
-        <Phone className="h-4 w-4 mr-2" />
-        {children || "Call"}
-      </Button>
-    )
-  }
-
-  // Dynamically import the CallButton component
-  const DynamicCallButton = require("@/components/call-button").default
-
-  return (
-    <DynamicCallButton
-      phoneNumber={phoneNumber}
-      contactName={contactName}
-      contactId={contactId}
-      callListId={callListId}
-      size={size}
-    >
-      {children}
-    </DynamicCallButton>
-  )
-}
