@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "realtime-server": "node lib/openai-realtime/server.js"
+    "realtime-server": "node server/server.js"
   },
   "dependencies": {
     "@node-rs/bcrypt": "^1.10.7",
