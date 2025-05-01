@@ -13,7 +13,7 @@ export async function POST(request) {
 
     await dbConnect()
 
-    const { contactId, instructionId, callListId, transcription, callLength, status } = await request.json()
+    const { contactId, instructionId, callListId, transcription, callLength, status, inputTokens, outputTokens } = await request.json()
 
     if (!contactId) {
       return Response.json({ success: false, error: "Contact ID is required" }, { status: 400 })
@@ -28,6 +28,8 @@ export async function POST(request) {
       callLength,
       status,
       summary: null,
+      inputTokens,
+      outputTokens
     })
 
     await phoneCall.save()

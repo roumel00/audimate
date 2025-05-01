@@ -9,6 +9,8 @@ const phoneCallSchema = new mongoose.Schema({
   transcription: String,
   callLength: Number,
   summary: String,
+  inputTokens: Number,
+  outputTokens: Number
 });
 
 export default mongoose.models.PhoneCall || mongoose.model("PhoneCall", phoneCallSchema);

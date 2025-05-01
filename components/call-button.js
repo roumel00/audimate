@@ -24,6 +24,7 @@ export default function CallButton({
   const [items, setItems] = useState([])
   const [callStartTime, setCallStartTime] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [usage, setUsage] = useState({ input: 0, output: 0 })
 
   const logsWsRef = useRef(null)
   const callSidRef = useRef(null)
@@ -53,6 +54,8 @@ export default function CallButton({
     socket.onmessage = (evt) => {
       try {
         const data = JSON.parse(evt.data)
+
+        if (data.type === "response.output_item.done" || "response.done") setUsage(data.usage)
         handleRealtimeEvent(data, setItems)
       } catch (err) {
         console.error("[Logs] bad JSON", err)
@@ -165,6 +168,8 @@ export default function CallButton({
           transcription,
           callLength,
           status: "called",
+          inputTokens: usage.input,
+          outputTokens: usage.output
         }),
       })
 
