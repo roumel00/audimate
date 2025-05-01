@@ -55,7 +55,7 @@ export function InstructionDetails({ callListId, instruction, isLoading, onInstr
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No instruction set</h3>
             <p className="text-muted-foreground max-w-md">
-              This call list doesn't have an instruction set assigned. Instruction sets tell the AI how to conduct
+              This call list doesn&apos;t have an instruction set assigned. Instruction sets tell the AI how to conduct
               calls.
             </p>
             <Button variant="outline" className="mt-4" onClick={handleOpenChangeDialog}>

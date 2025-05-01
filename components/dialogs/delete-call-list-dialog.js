@@ -39,7 +39,7 @@ export function DeleteCallListDialog({ isOpen, setIsOpen, callList, onConfirm })
             Delete Call List
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the call list "{callList.name}"? This action cannot be undone.
+            Are you sure you want to delete the call list &quot;{callList.name}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

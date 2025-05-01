@@ -18,7 +18,7 @@ export function EmptyTagsState({ searchQuery, isCreatingTag, onCreateTagClick })
         <>
           <h3 className="text-lg font-medium mb-2">No tags yet</h3>
           <p className="text-muted-foreground mb-6 max-w-md">
-            You haven't created any tags yet. Tags help you organize your contacts.
+            You haven&apos;t created any tags yet. Tags help you organize your contacts.
           </p>
         </>
       )}

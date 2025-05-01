@@ -60,7 +60,7 @@ export function DeleteTagDialog({ isOpen, setIsOpen, tag, onTagDeleted }) {
             Delete Tag
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the tag "{tag.name}"? This action cannot be undone.
+            Are you sure you want to delete the tag &quot;{tag.name}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

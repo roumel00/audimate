@@ -39,7 +39,7 @@ export function DeleteInstructionDialog({ isOpen, setIsOpen, instruction, onConf
             Delete Instruction
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the instruction "{instruction.name}"? This action cannot be undone.
+            Are you sure you want to delete the instruction &quot;{instruction.name}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

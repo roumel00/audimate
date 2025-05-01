@@ -38,7 +38,7 @@ export function TagTableRow({ tag, onEdit, onDelete, onSelect }) {
           </PopoverTrigger>
           <PopoverContent className="w-80">
             <div className="space-y-2">
-              <h4 className="font-medium">Description for "{tag.name}"</h4>
+              <h4 className="font-medium">Description for &quot;{tag.name}&quot;</h4>
               <p className="text-sm">{tag.description}</p>
             </div>
           </PopoverContent>

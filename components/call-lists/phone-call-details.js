@@ -169,7 +169,7 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
             <PhoneOff className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Call Records</h3>
             <p className="text-muted-foreground max-w-md mb-6">
-              This contact hasn't been called yet with this call list.
+              This contact hasn&apos;t been called yet with this call list.
             </p>
           </div>
         )}
