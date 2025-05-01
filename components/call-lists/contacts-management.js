@@ -20,6 +20,7 @@ export function ContactsManagement({
   isLoading,
   instruction,
   onContactSelect,
+  fromPhoneNumber,
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedContacts, setSelectedContacts] = useState([])
@@ -246,6 +247,7 @@ export function ContactsManagement({
                             instructionId={instruction?.id}
                             callListId={callList?.id}
                             onCallCompleted={handleCallCompleted}
+                            fromPhoneNumber={fromPhoneNumber}
                           />
                         ) : (
                           <Button variant="outline" size="sm" disabled title="No phone number available">

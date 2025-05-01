@@ -7,8 +7,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, CheckCircle2, FileText, MessageSquare, Plus, ShoppingBag, Trash2, Upload } from "lucide-react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileText,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  ShoppingBag,
+  Sparkles,
+  Trash2,
+  Upload,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { useToast } from "@/hooks/use-toast"
 
 export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
@@ -24,8 +36,11 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
   const [newObjection, setNewObjection] = useState({ objection: "", answer: "" })
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false)
+  const [additionalDetails, setAdditionalDetails] = useState("")
   const fileInputRef = useRef(null)
   const dropZoneRef = useRef(null)
+  const { toast } = useToast()
 
   // Initialize form data when instruction changes
   useEffect(() => {
@@ -175,6 +190,61 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
     setNewObjection((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleGenerateScript = async () => {
+    if (!formData.offering.trim()) {
+      toast({
+        title: "Offering required",
+        description: "Please provide an offering description before generating a script.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsGeneratingScript(true)
+      setError("")
+
+      const response = await fetch("/api/instructions/generate-script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          offering: formData.offering,
+          additionalDetails: additionalDetails,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate script")
+      }
+
+      const data = await response.json()
+
+      if (data.result) {
+        setFormData((prev) => ({
+          ...prev,
+          currentScript: data.result,
+        }))
+
+        // Switch to manual tab to show the generated script
+        setScriptTab("manual")
+
+        toast({
+          title: "Script generated",
+          description: "Your script has been generated successfully.",
+        })
+      } else {
+        throw new Error("No script was generated")
+      }
+    } catch (error) {
+      console.error("Error generating script:", error)
+      setError(error.message || "Failed to generate script")
+    } finally {
+      setIsGeneratingScript(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
@@ -244,7 +314,7 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <div className="space-y-2">
                 <Label htmlFor="offering" className="flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
@@ -291,6 +361,10 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                   <Separator className={"mx-2 bg-primary"} orientation="vertical" />
                   <TabsTrigger value="upload" className={"cursor-pointer"}>
                     Upload File
+                  </TabsTrigger>
+                  <Separator className={"mx-2 bg-primary"} orientation="vertical" />
+                  <TabsTrigger value="generate" className={"cursor-pointer"}>
+                    Generate Script
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="manual" className="space-y-4">
@@ -345,6 +419,62 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                       </div>
                     </div>
                   )}
+                </TabsContent>
+                <TabsContent value="generate" className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="additionalDetails" className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                        Script Requirements
+                      </Label>
+                      <Textarea
+                        id="additionalDetails"
+                        value={additionalDetails}
+                        onChange={(e) => setAdditionalDetails(e.target.value)}
+                        placeholder="Provide any specific requirements, tone preferences, or details for the script generation"
+                        className="min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="flex justify-end">
+                      <div className="flex flex-col items-end gap-2">
+                        <Button
+                          type="button"
+                          onClick={handleGenerateScript}
+                          disabled={isGeneratingScript || !formData.offering.trim()}
+                          className="flex items-center gap-2"
+                        >
+                          {isGeneratingScript ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                              Generating Script...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4" />
+                              Generate Script
+                            </>
+                          )}
+                        </Button>
+
+                        {!formData.offering.trim() && (
+                          <p className="text-sm text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            Please enter an offering description first
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {formData.currentScript && (
+                      <div className="mt-4">
+                        <Label>Generated Script</Label>
+                        <div className="border rounded-md p-4 mt-2 max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+                          {formData.currentScript}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>

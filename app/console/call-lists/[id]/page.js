@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react"
 import { ContactsManagement } from "@/components/call-lists/contacts-management"
 import { InstructionDetails } from "@/components/call-lists/instruction-details"
 import { PhoneCallDetails } from "@/components/call-lists/phone-call-details"
+import PhoneNumberSelector from "@/components/call-lists/phone-number-selector"
 
 export default function CallListDetailsPage() {
   const { id } = useParams()
@@ -23,6 +24,7 @@ export default function CallListDetailsPage() {
   const [error, setError] = useState("")
   const [selectedContact, setSelectedContact] = useState(null)
   const [rightSideView, setRightSideView] = useState("instruction") // Either "instruction" or "call"
+  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null)
 
   // Fetch call list details
   const fetchCallListDetails = async () => {
@@ -161,6 +163,11 @@ export default function CallListDetailsPage() {
     }
   }
 
+  // Handle phone number selection
+  const handlePhoneNumberChange = (phoneNumber) => {
+    setSelectedPhoneNumber(phoneNumber)
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -171,6 +178,10 @@ export default function CallListDetailsPage() {
 
         <h1 className="text-3xl font-bold">{isLoading ? "Loading..." : callList?.name}</h1>
         <p className="text-muted-foreground mt-1">Manage contacts and view details for this call list</p>
+      </div>
+
+      <div className="mb-6">
+        <PhoneNumberSelector selectedPhoneNumber={selectedPhoneNumber} onPhoneNumberChange={handlePhoneNumberChange} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -184,6 +195,7 @@ export default function CallListDetailsPage() {
             isLoading={isLoading}
             onContactSelect={handleContactSelect}
             onCallCompleted={handleCallCompleted}
+            fromPhoneNumber={selectedPhoneNumber}
           />
         </div>
 

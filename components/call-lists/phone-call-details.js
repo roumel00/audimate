@@ -5,13 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Clock, Phone, PhoneOff, User } from "lucide-react"
+import { ArrowLeft, Clock, FileText, Phone, PhoneOff, RefreshCw, User, Sparkles } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useToast } from "@/hooks/use-toast"
 
 export function PhoneCallDetails({ contact, callListId, onBack }) {
   const [phoneCall, setPhoneCall] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isSummarizing, setIsSummarizing] = useState(false)
+  const { toast } = useToast()
 
   const refreshPhoneCall = async () => {
     if (!contact?.id) return
@@ -42,6 +45,66 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
       setError(error.message)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const generateSummary = async () => {
+    if (!phoneCall?.transcription) {
+      toast({
+        title: "No transcript available",
+        description: "A transcript is required to generate a summary.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsSummarizing(true)
+
+      const response = await fetch(`/api/call-lists/${callListId}/summarise-transcript`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transcription: phoneCall.transcription }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate summary")
+      }
+
+      const data = await response.json()
+
+      if (data.result) {
+        // Update the phone call with the new summary
+        const updatedPhoneCall = { ...phoneCall, summary: data.result }
+        setPhoneCall(updatedPhoneCall)
+
+        // Save the summary to the database
+        await fetch(`/api/phone-calls/${phoneCall._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ summary: data.result }),
+        })
+
+        toast({
+          title: "Summary generated",
+          description: "The call summary has been generated successfully.",
+        })
+      } else {
+        throw new Error("No summary was generated")
+      }
+    } catch (error) {
+      console.error("Error generating summary:", error)
+      toast({
+        title: "Failed to generate summary",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSummarizing(false)
     }
   }
 
@@ -139,12 +202,28 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
               )}
             </div>
 
-            {phoneCall.summary && (
+            {phoneCall.summary ? (
               <div className="border rounded-md p-4 bg-background">
                 <h3 className="text-sm font-medium mb-2">Call Summary</h3>
                 <div className="whitespace-pre-wrap text-sm">{phoneCall.summary}</div>
               </div>
-            )}
+            ) : phoneCall.transcription ? (
+              <div className="flex justify-center mt-4">
+                <Button onClick={generateSummary} disabled={isSummarizing} className="flex items-center gap-2">
+                  {isSummarizing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Generating Summary...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Generate Call Summary
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : null}
           </div>
         )}
       </CardContent>

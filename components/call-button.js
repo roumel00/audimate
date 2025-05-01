@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast"
 import handleRealtimeEvent from "@/lib/handle-realtime-event"
 import { getPrompt } from "@/lib/formulate-prompt"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { XIcon } from "lucide-react"
 
 const BASE_WS_URL = process.env.NEXT_PUBLIC_REALTIME_WS_URL || "ws://localhost:8081"
 
@@ -17,6 +19,7 @@ export default function CallButton({
   instructionId,
   callListId,
   onCallCompleted,
+  fromPhoneNumber,
 }) {
   const [loading, setLoading] = useState(false)
   const [callStatus, setCallStatus] = useState("disconnected")
@@ -99,7 +102,10 @@ export default function CallButton({
       const res = await fetch("/api/twilio/realtime-call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber }),
+        body: JSON.stringify({
+          phoneNumber,
+          fromPhoneNumber,
+        }),
       })
       const data = await res.json()
 
@@ -169,7 +175,7 @@ export default function CallButton({
           callLength,
           status: "called",
           inputTokens: usage.input,
-          outputTokens: usage.output
+          outputTokens: usage.output,
         }),
       })
 
@@ -285,7 +291,7 @@ export default function CallButton({
       const userData = await userRes.json()
 
       if (instructionData && userData) {
-        promptText = getPrompt(userData.user.company, instructionData.instruction)
+        promptText = getPrompt(userData.user.company, instructionData.instruction, contactName)
       }
     }
 
@@ -317,11 +323,17 @@ export default function CallButton({
       <Dialog
         open={open}
         onOpenChange={(isOpen) => {
-          setOpen(isOpen)
           if (!isOpen) endCall()
+          setOpen(isOpen)
         }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+        <DialogContent
+          className="sm:max-w-[600px] max-h-[80vh] flex flex-col"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Call with {contactName}</DialogTitle>
             <DialogDescription>
@@ -367,6 +379,13 @@ export default function CallButton({
             <Button variant="outline" onClick={endCall} disabled={isSaving || callStatus === "disconnected"}>
               {isSaving ? "Saving..." : callStatus !== "disconnected" ? "End Call" : "Ending Call.."}
             </Button>
+            <DialogPrimitive.Close
+              className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              onClick={endCall}
+            >
+              <XIcon className="cursor-pointer" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
           </div>
         </DialogContent>
       </Dialog>
