@@ -44,7 +44,6 @@ export default function SettingsPage() {
       }
 
       const userData = await response.json()
-      console.log(userData)
       setUserCredit(userData.user.credit)
     } catch (error) {
       console.error("Error fetching user credit:", error)

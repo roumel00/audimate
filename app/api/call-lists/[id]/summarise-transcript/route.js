@@ -57,7 +57,6 @@ export async function POST(request) {
     `.trim()
 
     const transcriptionSummary = await callDeepSeek(systemPrompt, userPrompt)
-    console.log(transcriptionSummary.usage)
 
     return NextResponse.json({ result: transcriptionSummary.message }, { status: 200 })
   } catch (error) {

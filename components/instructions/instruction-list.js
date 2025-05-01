@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Edit, Trash2, ShoppingBag } from "lucide-react"
-import { DeleteInstructionDialog } from "./delete-instruction-dialog"
+import { DeleteInstructionDialog } from "../dialogs/delete-instruction-dialog"
 import { EmptyInstructionsState } from "./empty-instructions-state"
 
 export function InstructionList({ instructions, onEdit, onDelete, onCreateNew, isLoading }) {

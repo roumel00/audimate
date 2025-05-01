@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { CallListsTable } from "@/components/call-lists/call-lists-table"
-import { CreateCallListDialog } from "@/components/call-lists/create-call-list-dialog"
+import { CreateCallListDialog } from "@/components/dialogs/create-call-list-dialog"
 
 export default function CallListsPage() {
   const { data: session } = useSession()

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { FileText, MessageSquare, ShoppingBag, Edit } from 'lucide-react'
 import { useState } from "react"
-import { ChangeInstructionDialog } from "./change-instruction-dialog"
+import { ChangeInstructionDialog } from "../dialogs/change-instruction-dialog"
 
 export function InstructionDetails({ callListId, instruction, isLoading, onInstructionChanged }) {
   const [isChangeDialogOpen, setIsChangeDialogOpen] = useState(false)

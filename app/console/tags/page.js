@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast"
 import { TagsHeader } from "@/components/tags/tags-header"
 import { TagCreationForm } from "@/components/tags/tag-creation-form"
 import { TagsTable } from "@/components/tags/tags-table"
-import { DeleteTagDialog } from "@/components/tags/delete-tag-dialog"
+import { DeleteTagDialog } from "@/components/dialogs/delete-tag-dialog"
 import { ErrorAlert } from "@/components/ui/error-alert"
 import { TagDetailView } from "@/components/tags/tag-detail-view"
 

@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Plus, Trash2, Users, CheckCircle2 } from "lucide-react"
-import { AddContactsDialog } from "./add-contacts-dialog"
+import { AddContactsDialog } from "../dialogs/add-contacts-dialog"
 import { EmptyContactsState } from "./empty-contacts-state"
-import CallButton from "@/components/call-button"
+import CallButton from "@/components/call-lists/call-button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 
 export function ContactsManagement({

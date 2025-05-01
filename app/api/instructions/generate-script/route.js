@@ -75,7 +75,6 @@ export async function POST(request) {
     `.trim()
 
     const script = await callDeepSeek(systemPrompt, userPrompt)
-    console.log(script.usage)
 
     return NextResponse.json({ result: script.message }, { status: 200 })
   } catch (error) {

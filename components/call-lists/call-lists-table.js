@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Edit, Trash2, List, Plus, Check, X } from "lucide-react"
-import { DeleteCallListDialog } from "./delete-call-list-dialog"
+import { DeleteCallListDialog } from "../dialogs/delete-call-list-dialog"
 import { EmptyCallListsState } from "./empty-call-lists-state"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
