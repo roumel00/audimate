@@ -25,6 +25,7 @@ export async function GET(req) {
         name: user.name,
         email: user.email,
         company: user.company,
+        credit: user.credit
       },
     })
   } catch (error) {

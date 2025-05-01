@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const phoneCallSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -7,10 +7,14 @@ const phoneCallSchema = new mongoose.Schema({
   callList: { type: mongoose.Schema.Types.ObjectId, ref: "CallList" },
   status: String,
   transcription: String,
-  callLength: Number,
+  callLength: {
+    type: Number,
+    get: (v) => Number.parseFloat(v.toFixed(1)),
+    set: (v) => Number.parseFloat(v.toFixed(1)),
+  },
   summary: String,
   inputTokens: Number,
-  outputTokens: Number
-});
+  outputTokens: Number,
+})
 
-export default mongoose.models.PhoneCall || mongoose.model("PhoneCall", phoneCallSchema);
+export default mongoose.models.PhoneCall || mongoose.model("PhoneCall", phoneCallSchema)

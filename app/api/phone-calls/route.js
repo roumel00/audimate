@@ -2,21 +2,39 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import dbConnect from "@/lib/mongoose"
 import PhoneCall from "@/models/PhoneCall"
+import User from "@/models/User"
+import { NextResponse } from "next/server"
 
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
-      return Response.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
     await dbConnect()
 
-    const { contactId, instructionId, callListId, transcription, callLength, status, inputTokens, outputTokens } = await request.json()
+    const {
+      contactId,
+      instructionId,
+      callListId,
+      transcription,
+      callLength,
+      status,
+      inputTokens,
+      outputTokens,
+      creditDeduction,
+    } = await request.json()
 
-    if (!contactId) {
-      return Response.json({ success: false, error: "Contact ID is required" }, { status: 400 })
+    // Validate credit deduction
+    if (creditDeduction) {
+      const user = await User.findById(session.user.id)
+      if (!user) {
+        return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
+      }
+
+      user.credit = user.credit - creditDeduction
+      await user.save()
     }
 
     const phoneCall = new PhoneCall({
@@ -34,10 +52,10 @@ export async function POST(request) {
 
     await phoneCall.save()
 
-    return Response.json({ success: true, phoneCall })
+    return NextResponse.json({ success: true, phoneCall }, { status: 200 })
   } catch (error) {
-    console.error("Error saving phone call:", error)
-    return Response.json({ success: false, error: error.message }, { status: 500 })
+    console.error("Error creating phone call:", error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
 
@@ -55,12 +73,12 @@ export async function GET(request) {
     const contactId = searchParams.get("contactId")
     const callListId = searchParams.get("callListId")
 
-    const query = { user: session.user.id };
+    const query = { user: session.user.id }
     if (contactId) {
-      query.contact = contactId;
+      query.contact = contactId
     }
     if (callListId) {
-      query.callList = callListId;
+      query.callList = callListId
     }
     const phoneCalls = await PhoneCall.find(query)
       .populate("contact", "name phoneNumber")

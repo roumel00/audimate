@@ -1,9 +1,9 @@
-import { callDeepSeek } from "@/lib/deepseek";
+import { callDeepSeek } from "@/lib/deepseek"
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import dbConnect from "@/lib/mongoose"
-import User from "@/models/User";
+import User from "@/models/User"
 
 export async function POST(request) {
   try {
@@ -15,13 +15,24 @@ export async function POST(request) {
 
     await dbConnect()
 
-    const user = await User.find({ user: session.user.id }).lean()
+    const user = await User.findById(session.user.id)
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    if (user.credit < 0.01) {
+      return NextResponse.json({ error: "Insufficient credit" }, { status: 400 })
+    }
+
+    user.credit = Math.max(0, user.credit - 0.01)
+    await user.save()
+
     const company = user.company
 
     const { offering, additionalDetails } = await request.json()
 
     const systemPrompt = `
-      You are “ColdCallScriptPro,” an expert sales copywriter.  
+      You are "ColdCallScriptPro," an expert sales copywriter.  
       When given **Company**, **Offering**, and **UserNotes**, create a succinct, persuasive cold-call script in plain text only.  
       
       Script format (strictly follow headings; no additional commentary, no markdown, no JSON):
@@ -53,7 +64,7 @@ export async function POST(request) {
       Include placeholders ${company}, and ${offering} where appropriate.  
       Keep the whole script ≤ 250 words.  
       Return *only* the script text—no code fences, no explanations.    
-    `.trim();
+    `.trim()
 
     const userPrompt = `
       Company: ${company}
@@ -61,14 +72,14 @@ export async function POST(request) {
       UserNotes: ${additionalDetails}
       
       Generate the cold-call script as specified by PitchCrafter. Output the single JSON object only.
-    `.trim();
+    `.trim()
 
     const script = await callDeepSeek(systemPrompt, userPrompt)
     console.log(script.usage)
 
-    return NextResponse.json({ result: script.message }, { status: 200 });
+    return NextResponse.json({ result: script.message }, { status: 200 })
   } catch (error) {
-    console.error("Error generating syllabus:", error);
-    return NextResponse.json({ error: "Failed to generate syllabus" }, { status: 500 });
+    console.error("Error generating syllabus:", error)
+    return NextResponse.json({ error: "Failed to generate syllabus" }, { status: 500 })
   }
 }

@@ -1,12 +1,36 @@
-import { callDeepSeek } from "@/lib/deepseek";
+import { callDeepSeek } from "@/lib/deepseek"
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import dbConnect from "@/lib/mongoose"
+import User from "@/models/User"
 
 export async function POST(request) {
   try {
-    const {transcription } = await request.json();
+    const session = await getServerSession(authOptions)
+
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+
+    await dbConnect()
+
+    const user = await User.findById(session.user.id)
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    if (user.credit < 0.01) {
+      return NextResponse.json({ error: "Insufficient credit" }, { status: 400 })
+    }
+
+    user.credit = Math.max(0, user.credit - 0.01)
+    await user.save()
+
+    const { transcription } = await request.json()
 
     const systemPrompt = `
-      You are “Call-Scout,” an AI analyst who reviews outbound sales (cold-call) conversations.  
+      You are "Call-Scout," an AI analyst who reviews outbound sales (cold-call) conversations.  
       When given a raw transcript, produce a concise **plain-text summary** (no JSON, no markdown fences) that covers:
       
       • Prospect profile  
@@ -19,10 +43,10 @@ export async function POST(request) {
       • 1-2 quotable moments (≤120 characters each)
       
       Formatting rules:  
-      1. Use short labeled sections in the above order, each on its own line (e.g., “Prospect profile: …”).  
+      1. Use short labeled sections in the above order, each on its own line (e.g., "Prospect profile: …").  
       2. Keep the entire summary under 200 words.  
       3. Do **not** invent details—derive everything from the transcript.      
-    `.trim();
+    `.trim()
 
     const userPrompt = `
       Here is the raw transcript of a cold call between our sales rep and a prospect:
@@ -30,14 +54,14 @@ export async function POST(request) {
       ${transcription}
       
       Please summarise it following the exact section headings and rules provided by Call-Scout.
-    `.trim();
+    `.trim()
 
     const transcriptionSummary = await callDeepSeek(systemPrompt, userPrompt)
     console.log(transcriptionSummary.usage)
 
-    return NextResponse.json({ result: transcriptionSummary.message }, { status: 200 });
+    return NextResponse.json({ result: transcriptionSummary.message }, { status: 200 })
   } catch (error) {
-    console.error("Error generating syllabus:", error);
-    return NextResponse.json({ error: "Failed to generate syllabus" }, { status: 500 });
+    console.error("Error generating syllabus:", error)
+    return NextResponse.json({ error: "Failed to generate syllabus" }, { status: 500 })
   }
 }

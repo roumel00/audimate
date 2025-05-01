@@ -30,6 +30,7 @@ export async function POST(request) {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          credit: user.credit,
         },
       },
       { status: 201 },

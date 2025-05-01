@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Phone } from "lucide-react"
+import { Phone, AlertCircle } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import handleRealtimeEvent from "@/lib/handle-realtime-event"
 import { getPrompt } from "@/lib/formulate-prompt"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 
 const BASE_WS_URL = process.env.NEXT_PUBLIC_REALTIME_WS_URL || "ws://localhost:8081"
 
@@ -28,10 +29,38 @@ export default function CallButton({
   const [callStartTime, setCallStartTime] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
   const [usage, setUsage] = useState({ input: 0, output: 0 })
+  const [userCredit, setUserCredit] = useState(null)
+  const [isCreditLoading, setIsCreditLoading] = useState(true)
+  const [creditError, setCreditError] = useState(null)
 
   const logsWsRef = useRef(null)
   const callSidRef = useRef(null)
   const { toast } = useToast()
+
+  // Fetch user credit information when component mounts
+  useEffect(() => {
+    const fetchUserCredit = async () => {
+      setIsCreditLoading(true)
+      setCreditError(null)
+
+      try {
+        const response = await fetch("/api/auth/user")
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data")
+        }
+
+        const userData = await response.json()
+        setUserCredit(userData.user.credit)
+      } catch (error) {
+        console.error("Error fetching user credit:", error)
+        setCreditError("Failed to load credit information")
+      } finally {
+        setIsCreditLoading(false)
+      }
+    }
+
+    fetchUserCredit()
+  }, [])
 
   const connectLogsSocket = useCallback(() => {
     if (logsWsRef.current) return
@@ -93,6 +122,16 @@ export default function CallButton({
       return
     }
 
+    // Check if user has sufficient credit
+    if (userCredit <= 0) {
+      toast({
+        title: "Insufficient Credit",
+        description: "You don't have enough credit to make a call. Please add credit to continue.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     setCallStatus("starting")
     setItems([])
@@ -139,9 +178,12 @@ export default function CallButton({
     setIsSaving(true)
 
     try {
-      // Calculate call duration in seconds
       const callEndTime = Date.now()
-      const callLength = Math.round((callEndTime - callStartTime) / 1000)
+      const callLengthRaw = (callEndTime - callStartTime) / 1000
+      const callLength = Math.round(callLengthRaw * 10) / 10
+
+      const units = Math.ceil(callLength / 3.6)
+      const creditDeduction = units * 0.01
 
       // Convert transcript items to plain text
       const transcription = items
@@ -176,6 +218,7 @@ export default function CallButton({
           status: "called",
           inputTokens: usage.input,
           outputTokens: usage.output,
+          creditDeduction,
         }),
       })
 
@@ -187,6 +230,9 @@ export default function CallButton({
         title: "Call saved",
         description: "The call transcript has been saved successfully",
       })
+
+      // Update user credit after call
+      setUserCredit((prev) => prev - creditDeduction)
 
       // Call the onCallCompleted callback if provided
       if (typeof onCallCompleted === "function") {
@@ -307,18 +353,52 @@ export default function CallButton({
     logsWsRef.current.close(1000, "Call ended by user")
   }
 
+  // Determine button state based on credit information
+  const isButtonDisabled = loading || callStatus === "connected" || isCreditLoading || userCredit <= 0 || !phoneNumber
+
+  // Determine tooltip content based on state
+  const getTooltipContent = () => {
+    if (isCreditLoading) return "Loading credit information..."
+    if (creditError) return creditError
+    if (userCredit <= 0) return "Insufficient credit. Please add credit to make calls."
+    if (!phoneNumber) return "No phone number available for this contact"
+    return null
+  }
+
+  const tooltipContent = getTooltipContent()
+  const showTooltip = !!tooltipContent
+
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={loading || callStatus === "connected"}
-        onClick={startCall}
-        className="flex items-center gap-1"
-      >
-        <Phone className="h-3.5 w-3.5" />
-        {loading ? "Calling…" : "Call"}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isButtonDisabled}
+                onClick={startCall}
+                className={`flex items-center gap-1 ${userCredit <= 0 ? "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800/30" : ""}`}
+              >
+                {isCreditLoading ? (
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                ) : userCredit <= 0 ? (
+                  <AlertCircle className="h-3.5 w-3.5 text-red-500" />
+                ) : (
+                  <Phone className="h-3.5 w-3.5" />
+                )}
+                {loading ? "Calling…" : "Call"}
+              </Button>
+            </div>
+          </TooltipTrigger>
+          {showTooltip && (
+            <TooltipContent>
+              <p>{tooltipContent}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
 
       <Dialog
         open={open}
