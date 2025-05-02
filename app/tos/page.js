@@ -19,15 +19,15 @@ export default function TermsOfService() {
 
       <main className="flex-1 py-12">
         <div className="container max-w-4xl mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8">Audimate – Terms & Services</h1>
+          <h1 className="text-3xl font-bold mb-8">Audimate - Terms & Services</h1>
           <p className="text-muted-foreground mb-8">Effective 1 May 2025</p>
 
           <section className="space-y-8">
             <div>
               <h2 className="text-xl font-semibold mb-3">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using Audimate (the "Service") at https://audimate.io, you agree to be bound by these
-                Terms & Services ("Terms"). If you do not agree, please do not use the Service.
+                By accessing or using Audimate (the &quot;Service&quot;) at https://audimate.io, you agree to be bound by these
+                Terms & Services (&quot;Terms&quot;). If you do not agree, please do not use the Service.
               </p>
             </div>
 
@@ -112,7 +112,7 @@ export default function TermsOfService() {
             <div>
               <h2 className="text-xl font-semibold mb-3">9. Disclaimer of Warranties</h2>
               <p>
-                The Service is provided "as is" and "as available." To the maximum extent permitted by law, Audimate
+                The Service is provided &quot;as is&quot; and &quot;as available.&quot; To the maximum extent permitted by law, Audimate
                 disclaims all warranties, express or implied, including merchantability, fitness for a particular
                 purpose, and non-infringement. We do not warrant that the Service will be uninterrupted, secure, or
                 error-free.

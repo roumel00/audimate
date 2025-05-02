@@ -18,17 +18,17 @@ export default function PrivacyPolicy() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">Audimate – Privacy Policy</h1>
+        <h1 className="text-3xl font-bold mb-6">Audimate - Privacy Policy</h1>
         <p className="text-gray-400 mb-8">Effective 1 May 2025</p>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
           <p className="mb-4">
-            Audimate ("we," "our," "us") operates the web-application available at{" "}
+            Audimate (&quot;we,&quot; &quot;our,&quot; &quot;us&quot;) operates the web-application available at{" "}
             <Link href="https://audimate.io" className="text-blue-400 hover:underline">
               https://audimate.io
             </Link>{" "}
-            (the "Service"). This Privacy Policy explains what information we collect, how we use it, and your choices.
+            (the &quot;Service&quot;). This Privacy Policy explains what information we collect, how we use it, and your choices.
             By using the Service, you agree to the terms of this Policy.
           </p>
         </section>
@@ -112,7 +112,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">7. Children's Privacy</h2>
+          <h2 className="text-2xl font-semibold mb-4">7. Children&apos;s Privacy</h2>
           <p>
             Audimate is not directed to children under 13. We do not knowingly collect personal data from children. If
             you believe a child has provided us with personal information, please contact us and we will delete it
