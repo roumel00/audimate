@@ -25,7 +25,10 @@ export async function GET(req) {
         name: user.name,
         email: user.email,
         company: user.company,
-        credit: user.credit
+        credit: user.credit,
+        tier: user.tier || "free",
+        stripeCustomerId: user.stripeCustomerId,
+        stripeSubscriptionId: user.stripeSubscriptionId,
       },
     })
   } catch (error) {

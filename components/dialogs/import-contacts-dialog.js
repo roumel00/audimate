@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,6 +17,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CreateTagDialog } from "./create-tag-dialog"
 import { parseCSV } from "@/lib/csv-parser"
+import { parseXLSX } from "@/lib/excel-parser"
 
 export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess, onTagsUpdated }) {
   const [step, setStep] = useState("upload") // upload, preview, importing
@@ -39,26 +40,35 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
   const processFile = async (file) => {
     if (!file) return
 
-    if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-      setError("Please upload a CSV file")
+    const isCSV = file.type === "text/csv" || file.name.endsWith(".csv")
+    const isExcel = file.name.endsWith(".xlsx")
+
+    if (!isCSV && !isExcel) {
+      setError("Please upload a CSV or Excel (.xlsx) file")
       return
     }
 
     setCsvFile(file)
 
     try {
-      const contacts = await parseCSV(file)
+      let contacts
+
+      if (isCSV) {
+        contacts = await parseCSV(file)
+      } else {
+        contacts = await parseXLSX(file)
+      }
 
       if (contacts.length === 0) {
-        setError("No contacts found in the CSV file")
+        setError("No contacts found in the file")
         return
       }
 
       setParsedContacts(contacts)
       setStep("preview")
     } catch (err) {
-      console.error("Error parsing CSV:", err)
-      setError("Failed to parse CSV file. Please check the format.")
+      console.error("Error parsing file:", err)
+      setError(`Failed to parse file: ${err.message || "Please check the format"}`)
     }
   }
 
@@ -171,7 +181,9 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Import Contacts</DialogTitle>
-            <DialogDescription>Upload a CSV file with your contacts and assign tags to them.</DialogDescription>
+            <DialogDescription>
+              Upload a CSV or Excel file with your contacts and assign tags to them.
+            </DialogDescription>
           </DialogHeader>
 
           {error && (
@@ -206,24 +218,29 @@ export function ImportContactsDialog({ isOpen, setIsOpen, tags, onImportSuccess,
                   <p className="font-medium">
                     {isDragging ? "Drop your file here" : "Click to upload or drag and drop"}
                   </p>
-                  <p className="text-sm text-muted-foreground">CSV files only (max 5MB)</p>
+                  <p className="text-sm text-muted-foreground">CSV or Excel (.xlsx) files only (max 5MB)</p>
                 </div>
 
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  accept=".txt,.docx"
+                  accept=".csv,.xlsx"
                   onChange={handleFileChange}
                   className="hidden"
                 />
               </div>
 
               <div className="mt-6">
-                <h3 className="font-medium mb-2">CSV Format Requirements</h3>
-                <p className="text-sm text-muted-foreground mb-2">Your CSV file should have the following columns:</p>
+                <h3 className="font-medium mb-2">File Format Requirements</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Your CSV or Excel file should have the following columns:
+                </p>
                 <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto">
                   firstName,lastName,phone,email
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Column names like &quot;First Name&quot;, &quot;Last Name&quot;, &quot;Phone Number&quot;, &quot;Email Address&quot; are also recognized.
+                </p>
               </div>
             </TabsContent>
 

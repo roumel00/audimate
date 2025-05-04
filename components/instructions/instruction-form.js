@@ -23,6 +23,9 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 
 export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) {
+  const OFFERING_CHAR_LIMIT = 500
+  const ADDITIONAL_DETAILS_CHAR_LIMIT = 1000
+
   const [formData, setFormData] = useState({
     name: "",
     offering: "",
@@ -65,6 +68,12 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
 
   const handleChange = (e) => {
     const { name, value } = e.target
+
+    // Apply character limits
+    if (name === "offering" && value.length > OFFERING_CHAR_LIMIT) {
+      return
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -320,14 +329,36 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                   Offering
                 </Label>
-                <Textarea
-                  id="offering"
-                  name="offering"
-                  value={formData.offering}
-                  onChange={handleChange}
-                  placeholder="What product or service is being offered?"
-                  className="min-h-[100px]"
-                />
+                <div className="space-y-1">
+                  <Textarea
+                    id="offering"
+                    name="offering"
+                    value={formData.offering}
+                    onChange={handleChange}
+                    placeholder="What product or service is being offered?"
+                    className={`min-h-[100px] ${
+                      formData.offering.length >= OFFERING_CHAR_LIMIT
+                        ? "border-destructive"
+                        : formData.offering.length >= OFFERING_CHAR_LIMIT * 0.8
+                          ? "border-amber-500"
+                          : ""
+                    }`}
+                    maxLength={OFFERING_CHAR_LIMIT}
+                  />
+                  <div className="flex justify-end">
+                    <span
+                      className={`text-xs ${
+                        formData.offering.length >= OFFERING_CHAR_LIMIT
+                          ? "text-destructive"
+                          : formData.offering.length >= OFFERING_CHAR_LIMIT * 0.8
+                            ? "text-amber-500"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {formData.offering.length}/{OFFERING_CHAR_LIMIT} characters
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -427,13 +458,35 @@ export function InstructionForm({ instruction, onSubmit, onCancel, isLoading }) 
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         Script Requirements
                       </Label>
-                      <Textarea
-                        id="additionalDetails"
-                        value={additionalDetails}
-                        onChange={(e) => setAdditionalDetails(e.target.value)}
-                        placeholder="Provide any specific requirements, tone preferences, or details for the script generation"
-                        className="min-h-[100px]"
-                      />
+                      <div className="space-y-1">
+                        <Textarea
+                          id="additionalDetails"
+                          value={additionalDetails}
+                          onChange={(e) => setAdditionalDetails(e.target.value)}
+                          placeholder="Provide any specific requirements, tone preferences, or details for the script generation"
+                          className={`min-h-[100px] ${
+                            additionalDetails.length >= ADDITIONAL_DETAILS_CHAR_LIMIT
+                              ? "border-destructive"
+                              : additionalDetails.length >= ADDITIONAL_DETAILS_CHAR_LIMIT * 0.8
+                                ? "border-amber-500"
+                                : ""
+                          }`}
+                          maxLength={ADDITIONAL_DETAILS_CHAR_LIMIT}
+                        />
+                        <div className="flex justify-end">
+                          <span
+                            className={`text-xs ${
+                              additionalDetails.length >= ADDITIONAL_DETAILS_CHAR_LIMIT
+                                ? "text-destructive"
+                                : additionalDetails.length >= ADDITIONAL_DETAILS_CHAR_LIMIT * 0.8
+                                  ? "text-amber-500"
+                                  : "text-muted-foreground"
+                            }`}
+                          >
+                            {additionalDetails.length}/{ADDITIONAL_DETAILS_CHAR_LIMIT} characters
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex justify-end">

@@ -9,6 +9,13 @@ const userSchema = new mongoose.Schema({
   twilioSID: { type: String, select: false },
   twilioAuthToken: { type: String, select: false },
   twilioPhoneNumbers: { type: [String], select: false },
+  tier: {
+    type: String,
+    enum: ["free", "business", "enterprise"],
+    default: "free",
+  },
+  stripeCustomerId: String,
+  stripeSubscriptionId: String,
 })
 
 export default mongoose.models.User || mongoose.model("User", userSchema)
