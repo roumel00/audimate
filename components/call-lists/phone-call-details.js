@@ -181,7 +181,7 @@ export function PhoneCallDetails({ contact, callListId, onBack }) {
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
                   {phoneCall.callLength
-                    ? `${Math.floor(phoneCall.callLength / 60)}:${String(phoneCall.callLength % 60).padStart(2, "0")}`
+                    ? `${Math.floor(Math.round(phoneCall.callLength) / 60)}:${String(Math.round(phoneCall.callLength) % 60).padStart(2, "0")}`
                     : "Duration unknown"}
                 </Badge>
 
