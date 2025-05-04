@@ -5,6 +5,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import dbConnect from "@/lib/mongoose"
 import User from "@/models/User"
 
+export const config = {
+  maxDuration: 60,
+}
+
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions)
