@@ -45,7 +45,7 @@ export async function POST(req) {
         },
       ],
       success_url: `${process.env.NEXTAUTH_URL}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/purchase/cancel`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/console/settings`,
       metadata: {
         userId: user._id.toString(),
         creditUnits: String(units),

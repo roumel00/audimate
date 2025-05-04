@@ -69,7 +69,7 @@ export async function POST(req) {
       allow_promotion_codes: true,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.NEXTAUTH_URL}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/purchase/cancel`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/console/settings`,
       metadata: { userId: user._id.toString(), tier },
     });
 
