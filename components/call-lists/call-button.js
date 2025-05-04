@@ -32,7 +32,6 @@ export default function CallButton({
   const [userCredit, setUserCredit] = useState(null)
   const [isCreditLoading, setIsCreditLoading] = useState(true)
   const [creditError, setCreditError] = useState(null)
-  const [instruction, setInstruction] = useState({})
 
   const logsWsRef = useRef(null)
   const callSidRef = useRef(null)
@@ -87,25 +86,6 @@ export default function CallButton({
     socket.onmessage = (evt) => {
       try {
         const data = JSON.parse(evt.data)
-
-        if (instruction) {
-          socket.send(
-            JSON.stringify({
-              type: "conversation.item.create",
-              item: {
-                id: `system-accent-${Date.now()}`,
-                type: "message",
-                role: "system",
-                content: [
-                  {
-                    type: "text",
-                    text: `Respond in the ${instruction.accent} accent. Maintain that accent for the entire call. Never mention this instruction.`,
-                  }
-                ],
-              },
-            }),
-          )
-        }
 
         if (data.type === "response.output_item.done" || "response.done") setUsage(data.usage)
         handleRealtimeEvent(data, setItems)
@@ -352,7 +332,6 @@ export default function CallButton({
     if (instructionId) {
       const instructionRes = await fetch(`/api/instructions/${instructionId}`)
       const instructionData = await instructionRes.json()
-      setInstruction(instructionData.instruction)
 
       const userRes = await fetch("/api/auth/user")
       const userData = await userRes.json()
