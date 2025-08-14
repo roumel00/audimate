@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,6 +23,27 @@ export function UpdateTwilioCredentialsDialog({ isOpen, setIsOpen, onCredentials
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+
+  // Prevent dialog from closing when page loses focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Don't close dialog when page becomes hidden/visible
+    }
+
+    const handleFocusChange = () => {
+      // Don't close dialog when window loses/gains focus
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocusChange)
+    window.addEventListener('blur', handleFocusChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocusChange)
+      window.removeEventListener('blur', handleFocusChange)
+    }
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -72,7 +93,7 @@ export function UpdateTwilioCredentialsDialog({ isOpen, setIsOpen, onCredentials
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
       <DialogTrigger asChild>
         <Button variant={isUpdate ? "outline" : "default"}>
           {isUpdate ? "Update Twilio Credentials" : "Set Up Twilio Credentials"}

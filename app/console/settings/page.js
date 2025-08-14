@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Phone, Shield, User } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { TwilioCredentialsCard } from "@/components/twilio-credentials-card"
 import { TwilioPhoneNumbersCard } from "@/components/twilio-phone-numbers-card"
 import { AccountTab } from "@/components/settings/account-tab"
@@ -17,8 +16,6 @@ export default function SettingsPage() {
   const [userCredit, setUserCredit] = useState(null)
   const [twilioStatus, setTwilioStatus] = useState(null)
   const [subscriptionChanged, setSubscriptionChanged] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const { toast } = useToast()
 
   // Check if user has Twilio credentials
   const checkTwilioCredentials = async () => {
@@ -63,21 +60,21 @@ export default function SettingsPage() {
     fetchUserCredit()
   }
 
-  // Handle page remount when subscription changes
+  // Handle subscription change without forcing remount
   useEffect(() => {
     if (subscriptionChanged) {
-      setRefreshKey((prevKey) => prevKey + 1)
+      fetchUserCredit()
       setSubscriptionChanged(false)
     }
   }, [subscriptionChanged])
 
-  // Add key to trigger remount when subscription changes
+  // Initialize data when session is available
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       checkTwilioCredentials()
       fetchUserCredit()
     }
-  }, [session, refreshKey])
+  }, [session?.user?.id])
 
   const handleCredentialsUpdated = () => {
     // Refresh Twilio status after credentials are updated
@@ -85,7 +82,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6" key={refreshKey}>
+    <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
       {isLoading ? (
