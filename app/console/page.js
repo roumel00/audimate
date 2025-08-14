@@ -50,10 +50,10 @@ export default function ConsolePage() {
   };
 
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       checkTwilioCredentials();
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
   const handleTwilioSetupComplete = () => {
     checkTwilioCredentials();

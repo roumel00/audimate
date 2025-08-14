@@ -53,10 +53,10 @@ export default function TagsPage() {
 
   // Initial data fetch
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       fetchTags()
     }
-  }, [session])
+  }, [session?.user?.id])
 
   // Handle creating a new tag
   const handleCreateTag = async (tagData) => {

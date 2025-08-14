@@ -44,10 +44,10 @@ export default function ScriptsPage() {
 
   // Initial data fetch
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       fetchInstructions()
     }
-  }, [session])
+  }, [session?.user?.id])
 
   // Handle creating a new instruction
   const handleCreateInstruction = async (instructionData) => {

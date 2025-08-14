@@ -61,10 +61,10 @@ export default function CallListDetailsPage() {
 
   // Initial data fetch
   useEffect(() => {
-    if (session && id) {
+    if (session?.user?.id && id) {
       fetchCallListDetails()
     }
-  }, [session, id])
+  }, [session?.user?.id, id])
 
   // Handle adding contacts to call list
   const handleAddContacts = async (contactIds) => {

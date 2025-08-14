@@ -42,10 +42,10 @@ export default function CallListsPage() {
 
   // Initial data fetch
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       fetchCallLists()
     }
-  }, [session])
+  }, [session?.user?.id])
 
   // Handle deleting a call list
   const handleDeleteCallList = async (callListId) => {

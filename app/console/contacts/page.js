@@ -79,11 +79,11 @@ export default function ContactsPage() {
 
   // Initial data fetch
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       fetchTags()
       fetchContacts(pagination.page, selectedTags)
     }
-  }, [session])
+  }, [session?.user?.id])
 
   // Handle page change
   const handlePageChange = (newPage) => {
